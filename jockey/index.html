@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ジョッキーライフ - 騎手人生シミュレーション</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== スタート画面 ===================== -->
+<section id="screen-start" class="screen active">
+  <div class="panel start-panel">
+    <h1>🏇 ジョッキーライフ</h1>
+    <p class="lead">見習い騎手として競馬界に飛び込み、GI制覇と栄光を目指せ。</p>
+
+    <div id="continue-box" class="hidden">
+      <button id="btn-continue" class="btn btn-primary btn-block">▶ 続きから再開</button>
+      <button id="btn-new-from-continue" class="btn btn-ghost btn-block">🆕 最初から始める(セーブ削除)</button>
+    </div>
+
+    <div id="new-game-box">
+      <label class="field-label">騎手名</label>
+      <input id="input-name" type="text" maxlength="10" placeholder="例: 神崎 翔太">
+
+      <label class="field-label">得意なスタイルを1つ選んでください(初期ボーナス)</label>
+      <div class="style-choice" id="style-choice">
+        <button type="button" class="style-btn" data-style="technique">技術派<br><span>技術+10</span></button>
+        <button type="button" class="style-btn" data-style="stamina">スタミナ派<br><span>スタミナ+10</span></button>
+        <button type="button" class="style-btn" data-style="weight">減量特例<br><span>体重管理+10</span></button>
+        <button type="button" class="style-btn" data-style="connections">名門コネ<br><span>人脈+10</span></button>
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-block">デビューする</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== メインゲーム画面 ===================== -->
+<section id="screen-game" class="screen">
+  <header class="game-header">
+    <div class="header-main">
+      <div class="jockey-id">
+        <span id="hdr-name" class="hdr-name">-</span>
+        <span id="hdr-age" class="hdr-badge">満16歳</span>
+        <span id="hdr-license" class="hdr-badge license">見習い</span>
+      </div>
+      <div class="week-id">
+        <span id="hdr-year">1年目</span> ・ <span id="hdr-week">第1週</span>
+      </div>
+    </div>
+    <div class="header-stats" id="header-stats">
+      <!-- stat bars injected -->
+    </div>
+  </header>
+
+  <main class="game-main">
+    <section class="panel offers-panel">
+      <h2>今週の乗り馬オファー</h2>
+      <div id="injury-banner" class="injury-banner hidden"></div>
+      <div id="offers-list" class="offers-list"></div>
+      <button id="btn-skip-week" class="btn btn-ghost btn-block">今週は騎乗を見送る</button>
+    </section>
+
+    <aside class="panel log-panel">
+      <h2>今シーズンの成績</h2>
+      <div id="season-stats" class="season-stats"></div>
+      <h2>できごと履歴</h2>
+      <ul id="log-list" class="log-list"></ul>
+    </aside>
+  </main>
+
+  <footer class="game-footer">
+    <button id="btn-retire" class="btn btn-outline">引退を検討する</button>
+  </footer>
+</section>
+
+<!-- ===================== レースモーダル ===================== -->
+<div id="modal-race" class="modal-overlay hidden">
+  <div class="modal race-modal">
+    <div id="race-pre" class="race-stage">
+      <h2 id="race-title">レース</h2>
+      <p id="race-sub" class="race-sub"></p>
+      <div id="race-horse-card" class="horse-card"></div>
+      <button id="btn-race-go" class="btn btn-primary btn-block">レースへ向かう</button>
+    </div>
+
+    <div id="race-choice" class="race-stage hidden">
+      <h2>勝負どころ</h2>
+      <p id="race-choice-desc" class="race-sub"></p>
+      <div class="choice-row">
+        <button id="btn-choice-a" class="btn btn-choice"></button>
+        <button id="btn-choice-b" class="btn btn-choice"></button>
+      </div>
+      <div class="choice-row">
+        <button id="btn-choice-c" class="btn btn-choice"></button>
+        <button id="btn-choice-d" class="btn btn-choice"></button>
+      </div>
+    </div>
+
+    <div id="race-result" class="race-stage hidden">
+      <h2 id="result-headline">結果</h2>
+      <p id="result-narrative" class="narrative"></p>
+      <div id="result-board" class="result-board"></div>
+      <button id="btn-race-close" class="btn btn-primary btn-block">週を進める</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== イベントモーダル ===================== -->
+<div id="modal-event" class="modal-overlay hidden">
+  <div class="modal event-modal">
+    <h2 id="event-title">できごと</h2>
+    <p id="event-text" class="narrative"></p>
+    <div id="event-choices" class="event-choices"></div>
+  </div>
+</div>
+
+<!-- ===================== シーズンサマリー ===================== -->
+<div id="modal-season" class="modal-overlay hidden">
+  <div class="modal season-modal">
+    <h2 id="season-title">シーズン終了</h2>
+    <div id="season-summary" class="season-summary"></div>
+    <button id="btn-season-next" class="btn btn-primary btn-block">次のシーズンへ</button>
+  </div>
+</div>
+
+<!-- ===================== 引退確認 ===================== -->
+<div id="modal-retire-confirm" class="modal-overlay hidden">
+  <div class="modal">
+    <h2>引退しますか?</h2>
+    <p class="narrative" id="retire-confirm-text"></p>
+    <div class="choice-row">
+      <button id="btn-retire-cancel" class="btn btn-ghost">続ける</button>
+      <button id="btn-retire-confirm" class="btn btn-primary">引退する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== エンディング画面 ===================== -->
+<section id="screen-ending" class="screen">
+  <div class="panel ending-panel">
+    <h1 id="ending-title">お疲れ様でした</h1>
+    <div id="ending-career-summary" class="season-summary"></div>
+
+    <div id="ending-career-choice">
+      <h2>セカンドキャリアを選んでください</h2>
+      <div class="style-choice" id="career-choice">
+        <button type="button" class="style-btn" data-career="trainer">調教師<br><span>技術を活かす</span></button>
+        <button type="button" class="style-btn" data-career="commentator">解説者<br><span>人脈を活かす</span></button>
+        <button type="button" class="style-btn" data-career="breeder">牧場経営<br><span>実績を活かす</span></button>
+        <button type="button" class="style-btn" data-career="retire">静かな引退<br><span>ゆっくり暮らす</span></button>
+      </div>
+    </div>
+
+    <div id="ending-final" class="hidden">
+      <p id="ending-text" class="narrative"></p>
+      <button id="btn-restart" class="btn btn-primary btn-block">新しい騎手で始める</button>
+    </div>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
